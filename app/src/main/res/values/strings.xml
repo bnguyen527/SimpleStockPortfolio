@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SimpleStockPortfolio</string>
+    <string-array name="stocks_array">
+        <item>AAPL</item>
+        <item>MSFT</item>
+        <item>GOOG</item>
+        <item>FB</item>
+    </string-array>
+</resources>
