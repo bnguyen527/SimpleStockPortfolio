@@ -1,7 +1,6 @@
 package edu.temple.simplestockportfolio;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -10,6 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -24,7 +26,7 @@ public class PortfolioFragment extends Fragment {
 
     private static final String STOCKS_ARRAY_KEY = "stocks_array";
 
-    private String[] stocksArray;
+    private static ArrayList<String> stocksArray;
     private ListView portfolioListView;
 
     private ParentListener parentListener;
@@ -37,13 +39,13 @@ public class PortfolioFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param stocksArray Parameter 1.
+     * @param stocksArray list of stocks.
      * @return A new instance of fragment PortfolioFragment.
      */
-    public static PortfolioFragment newInstance(String[] stocksArray) {
+    public static PortfolioFragment newInstance(ArrayList<String> stocksArray) {
         PortfolioFragment fragment = new PortfolioFragment();
         Bundle args = new Bundle();
-        args.putStringArray(STOCKS_ARRAY_KEY, stocksArray);
+        args.putStringArray(STOCKS_ARRAY_KEY, stocksArray.toArray(new String[stocksArray.size()]));
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,7 +54,7 @@ public class PortfolioFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
-            stocksArray = getArguments().getStringArray(STOCKS_ARRAY_KEY);
+            stocksArray = new ArrayList<>(Arrays.asList(getArguments().getStringArray(STOCKS_ARRAY_KEY)));
     }
 
     @Override
@@ -65,7 +67,7 @@ public class PortfolioFragment extends Fragment {
         portfolioListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                parentListener.onStockPicked(stocksArray[position]);
+                parentListener.onStockPicked(stocksArray.get(position));
             }
         });
         return view;
@@ -85,6 +87,10 @@ public class PortfolioFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         parentListener = null;
+    }
+
+    public static void onNewStockAdded(String stock) {
+        stocksArray.add(stock);
     }
 
     /**

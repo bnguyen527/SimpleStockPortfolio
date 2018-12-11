@@ -28,7 +28,7 @@ public class StockDetailsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param stock Parameter 1.
+     * @param stock stock.
      * @return A new instance of fragment StockDetailsFragment.
      */
     public static StockDetailsFragment newInstance(String stock) {
