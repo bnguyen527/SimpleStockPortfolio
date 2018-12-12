@@ -1,31 +1,30 @@
 package edu.temple.simplestockportfolio;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
-class StockAdapter extends BaseAdapter {
+class PortfolioAdapter extends BaseAdapter {
 
     private Context context;
-    private ArrayList<String> stocks;
+    private Portfolio portfolio;
 
-    StockAdapter(Context context, ArrayList<String> stocks) {
+    PortfolioAdapter(Context context, Portfolio portfolio) {
         this.context = context;
-        this.stocks = stocks;
+        this.portfolio = portfolio;
     }
 
     @Override
     public int getCount() {
-        return stocks.size();
+        return portfolio.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return stocks.get(position);
+        return portfolio.getStock(position);
     }
 
     @Override
@@ -36,7 +35,12 @@ class StockAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView stockTextView = new TextView(context);
-        stockTextView.setText(stocks.get(position));
+        Stock cur = portfolio.getStock(position);
+        stockTextView.setText(cur.getSymbol() + ": $" + cur.getPrice());
+        if (cur.getPrice() >= cur.getOpenPrice())
+            stockTextView.setBackgroundColor(Color.GREEN);
+        else
+            stockTextView.setBackgroundColor(Color.RED);
         stockTextView.setTextSize(28);
         return stockTextView;
     }

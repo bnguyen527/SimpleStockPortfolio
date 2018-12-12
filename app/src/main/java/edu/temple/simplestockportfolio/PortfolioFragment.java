@@ -9,9 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.Arrays;
+import android.widget.TextView;
 
 
 /**
@@ -24,10 +22,12 @@ import java.util.Arrays;
  */
 public class PortfolioFragment extends Fragment {
 
-    private static final String STOCKS_ARRAY_KEY = "stocks_array";
+    private static final String PORTFOLIO_KEY = "portfolio";
 
-    private static ArrayList<String> stocksArray;
+    private static Portfolio portfolio;
+    private static TextView addStockHint;
     private ListView portfolioListView;
+    private static PortfolioAdapter portfolioAdapter;
 
     private ParentListener parentListener;
 
@@ -39,13 +39,13 @@ public class PortfolioFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param stocksArray list of stocks.
+     * @param portfolio stock portfolio.
      * @return A new instance of fragment PortfolioFragment.
      */
-    public static PortfolioFragment newInstance(ArrayList<String> stocksArray) {
+    public static PortfolioFragment newInstance(Portfolio portfolio) {
         PortfolioFragment fragment = new PortfolioFragment();
         Bundle args = new Bundle();
-        args.putStringArray(STOCKS_ARRAY_KEY, stocksArray.toArray(new String[stocksArray.size()]));
+        args.putByteArray(PORTFOLIO_KEY, portfolio.serialize());
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,7 +54,7 @@ public class PortfolioFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
-            stocksArray = new ArrayList<>(Arrays.asList(getArguments().getStringArray(STOCKS_ARRAY_KEY)));
+            portfolio = Portfolio.deserialize(getArguments().getByteArray(PORTFOLIO_KEY));
     }
 
     @Override
@@ -62,12 +62,16 @@ public class PortfolioFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_portfolio, container, false);
+        addStockHint = view.findViewById(R.id.addStockHint);
+        if (portfolio.isEmpty())
+            addStockHint.setText(R.string.add_stock_hint);
         portfolioListView = view.findViewById(R.id.portfolioListView);
-        portfolioListView.setAdapter(new StockAdapter((Context) parentListener, stocksArray));
+        portfolioAdapter = new PortfolioAdapter((Context) parentListener, portfolio);
+        portfolioListView.setAdapter(portfolioAdapter);
         portfolioListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                parentListener.onStockPicked(stocksArray.get(position));
+                parentListener.onStockPicked(position);
             }
         });
         return view;
@@ -81,6 +85,7 @@ public class PortfolioFragment extends Fragment {
         } else {
             throw new RuntimeException(context.toString() + " must implement ParentListener");
         }
+
     }
 
     @Override
@@ -89,8 +94,15 @@ public class PortfolioFragment extends Fragment {
         parentListener = null;
     }
 
-    public static void onNewStockAdded(String stock) {
-        stocksArray.add(stock);
+    public static void onNewStockAdded(Stock stock) {
+        if (portfolio.isEmpty())
+            addStockHint.setText("");
+        portfolio.addStock(stock);
+        portfolioAdapter.notifyDataSetChanged();
+    }
+
+    public static void onStockUpdated() {
+        portfolioAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -100,6 +112,6 @@ public class PortfolioFragment extends Fragment {
      * activity.
      */
     public interface ParentListener {
-        void onStockPicked(String stock);
+        void onStockPicked(int position);
     }
 }
